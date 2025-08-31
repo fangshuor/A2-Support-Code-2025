@@ -8,7 +8,7 @@ game_env.py
 This file contains a class representing a Cheese Hunter environment. You should make use of this class in your
 solver.
 
-COMP3702 Assignment 1 "Cheese Hunter" Support Code, 2025
+COMP3702 Assignment 2 "Cheese Hunter" Support Code, 2025
 """
 
 

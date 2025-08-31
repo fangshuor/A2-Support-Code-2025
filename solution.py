@@ -9,7 +9,7 @@ This file is a template you should use to implement your solution.
 You should implement each of the method stubs below. You may add additional methods and/or classes to this file if you 
 wish. You may also create additional source files and import to this file if you wish.
 
-COMP3702 Assignment 1 "Cheese Hunter" Support Code, 2025
+COMP3702 Assignment 2 "Cheese Hunter" Support Code, 2025
 """
 
 
@@ -26,6 +26,11 @@ class Solver:
         #
 
     @staticmethod
+    def get_student_number():
+        """Please enter your student number as a return string to this method."""
+        return "0"
+
+    @staticmethod
     def get_testcases():
         """
         Select which testcases you wish the autograder to test you on.
@@ -33,80 +38,165 @@ class Solver:
         e.g. [1, 4, 6] will only run testcases 1, 4, and 6, excluding, 2, 3, and 5.
         :return: a list containing which testcase numbers to run (testcases in 1-6).
         """
-        return [1, 2, 3, 4, 5, 6]
+        return [1, 2, 3, 4, 5]
 
     @staticmethod
-    def get_search():
+    def get_solution():
         """
-        Select which search you wish the autograder to run.
-        The autograder will only run the specified search methods.
-        e.g. "both" will run both UCS and A*, but "a_star" will only run A* and exclude UCS.
-        :return: a string containing which search methods to run ("ucs" to only run UCS, "a_star" to only run A*,
-        and "both" to run both).
+        Select which solution you wish the autograder to run, VI (Value Iteration) and/or PI (Policy Iteration).
+        The autograder will only run the specified solution methods.
+        e.g. "both" will run both VI and PI, but "value_iteration" will only run VI and exclude PI.
+        :return: a string containing which search methods to run ("value_iteration" to only run VI, "policy_iteration"
+         to only run PI, and "both" to run both).
         """
         return "both"
 
-    # === Uniform Cost Search ==========================================================================================
-    def search_ucs(self):
-        """
-        Find a path which solves the environment using Uniform Cost Search (UCS).
-        :return: path (list of actions, where each action is an element of GameEnv.ACTIONS)
-        """
+    # === Value Iteration ==============================================================================================
 
+    def vi_initialise(self):
+        """
+        Initialise any variables required before the start of Value Iteration.
+        """
         #
+        # TODO: Implement any initialisation for Value Iteration (e.g. building a list of states) here. You should not
+        #  perform value iteration in this method.
         #
-        # TODO: Implement your UCS code here.
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
         #
-        #
-
         pass
 
-    # === A* Search ====================================================================================================
-    def preprocess_heuristic(self):
+    def vi_is_converged(self):
         """
-        Perform pre-processing (e.g. pre-computing repeatedly used values) necessary for your heuristic,
+        Check if Value Iteration has reached convergence.
+        :return: True if converged, False otherwise
         """
-
         #
+        # TODO: Implement code to check if Value Iteration has reached convergence here.
         #
-        # TODO: (Optional) Implement code for any preprocessing required by your heuristic here (if your heuristic
-        #  requires preprocessing).
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
         #
-        # If you choose to implement code here, you should call this method from your search_a_star method (e.g. once at
-        # the beginning of your search).
-        #
-        #
-
         pass
 
-    def compute_heuristic(self, state):
+    def vi_iteration(self):
         """
-        Compute a heuristic value h(n) for the given state.
-        :param state: given state (GameState object)
-        :return a real number h(n)
+        Perform a single iteration of Value Iteration (i.e. loop over the state space once).
         """
-
         #
+        # TODO: Implement code to perform a single iteration of Value Iteration here.
         #
-        # TODO: Implement your heuristic function for A* search here. Note that your heuristic can be tested on
-        #  gradescope even if you have not yet implemented search_a_star.
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
         #
-        # You should call this method from your search_a_star method (e.g. every time you need to compute a heuristic
-        # value for a state).
-        #
-
         pass
 
-    def search_a_star(self):
+    def vi_plan_offline(self):
         """
-        Find a path which solves the environment using A* Search.
-        :return: path (list of actions, where each action is an element of GameEnv.ACTIONS)
+        Plan using Value Iteration.
         """
+        # !!! In order to ensure compatibility with tester, you should not modify this method !!!
+        self.vi_initialise()
+        while True:
+            self.vi_iteration()
 
-        #
-        #
-        # TODO: Implement your A* search code here.
-        #
-        #
+            # NOTE: vi_iteration is always called before vi_is_converged
+            if self.vi_is_converged():
+                break
 
+    def vi_get_state_value(self, state: GameState):
+        """
+        Retrieve V(s) for the given state.
+        :param state: the current state
+        :return: V(s)
+        """
+        #
+        # TODO: Implement code to return the value V(s) for the given state (based on your stored VI values) here. If a
+        #  value for V(s) has not yet been computed, this function should return 0.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        #
         pass
+
+    def vi_select_action(self, state: GameState):
+        """
+        Retrieve the optimal action for the given state (based on values computed by Value Iteration).
+        :param state: the current state
+        :return: optimal action for the given state (element of ROBOT_ACTIONS)
+        """
+        #
+        # TODO: Implement code to return the optimal action for the given state (based on your stored VI values) here.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        #
+        pass
+
+    # === Policy Iteration =============================================================================================
+
+    def pi_initialise(self):
+        """
+        Initialise any variables required before the start of Policy Iteration.
+        """
+        #
+        # TODO: Implement any initialisation for Policy Iteration (e.g. building a list of states) here. You should not
+        #  perform policy iteration in this method. You should assume an initial policy of always move FORWARDS.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        #
+        pass
+
+    def pi_is_converged(self):
+        """
+        Check if Policy Iteration has reached convergence.
+        :return: True if converged, False otherwise
+        """
+        #
+        # TODO: Implement code to check if Policy Iteration has reached convergence here.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        #
+        pass
+
+    def pi_iteration(self):
+        """
+        Perform a single iteration of Policy Iteration (i.e. perform one step of policy evaluation and one step of
+        policy improvement).
+        """
+        #
+        # TODO: Implement code to perform a single iteration of Policy Iteration (evaluation + improvement) here.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        #
+        pass
+
+    def pi_plan_offline(self):
+        """
+        Plan using Policy Iteration.
+        """
+        # !!! In order to ensure compatibility with tester, you should not modify this method !!!
+        self.pi_initialise()
+        while True:
+            self.pi_iteration()
+
+            # NOTE: pi_iteration is always called before pi_is_converged
+            if self.pi_is_converged():
+                break
+
+    def pi_select_action(self, state: GameState):
+        """
+        Retrieve the optimal action for the given state (based on values computed by Value Iteration).
+        :param state: the current state
+        :return: optimal action for the given state (element of ROBOT_ACTIONS)
+        """
+        #
+        # TODO: Implement code to return the optimal action for the given state (based on your stored PI policy) here.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        #
+        pass
+
+    # === Helper Methods ===============================================================================================
+    #
+    #
+    # TODO: Add any additional methods here
+    #
+    #
+
+

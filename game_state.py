@@ -3,18 +3,15 @@ game_state.py
 
 This file contains a class representing a Cheese Hunter state. You should make use of this class in your solver.
 
-COMP3702 Assignment 1 "Cheese Hunter" Support Code, 2025
+COMP3702 Assignment 2 "Cheese Hunter" Support Code, 2025
 """
 
 
 class GameState:
     """
-    Instance of a Cheese Hunter state. row and col represent the current player position. trap_status is 1 for
-    each activated lever/trap, and 0 for each remaining lever/trap.
+    Instance of a Cheese Hunter state. row and col represent the current player position.
 
-    You may use this class and its functions. You may add your own code to this class (e.g. get_successors function,
-    get_heuristic function, etc), but should avoid removing or renaming existing variables and functions to ensure
-    Tester functions correctly.
+    You may use this class and its functions, but should avoid modifying it to ensure compatibility with the Tester.
     """
 
     def __init__(self, row, col):

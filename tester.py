@@ -30,7 +30,7 @@ EPISODE_TRIALS = 50000
 def print_usage():
     print("Usage: python tester.py [plan_type] [testcase_file] [-v (optional)]")
     print("    plan_type = 'vi' or 'pi'")
-    print("    testcase_file = filename of a valid testcase file (e.g. L1.txt)")
+    print("    testcase_file = filename of a valid testcase file (e.g. level_1.txt)")
     print("    if -v is specified, the solver's trajectory will be visualised")
 
 

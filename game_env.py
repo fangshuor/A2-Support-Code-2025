@@ -32,6 +32,7 @@ class GameEnv:
     TRAPDOOR = "T"
     GOAL_TILE = "G"
     PLAYER_TILE = "P"
+    CHEESE_TRAP = "C"
     VALID_TILES = {
         SOLID_TILE,
         LADDER_TILE,
@@ -121,16 +122,16 @@ class GameEnv:
                 assert False, "/!\\ ERROR: Invalid input file - jump probability"
             try:
                 probs = [float(x) for x in get_line(f).split(",")]
-                assert sum(probs) == 1, "/!\\ ERROR: Invalid input file - walking probabilities do not sum to 1"
+                assert sum(probs) == 1, (
+                    "/!\\ ERROR: Invalid input file - walking probabilities do not sum to 1"
+                )
                 self.walking_probs = [probs[0], probs[1], probs[2]]
             except ValueError:
                 assert False, "/!\\ ERROR: Invalid input file - walking probabilities"
             try:
                 self.ladder_fall_prob = float(get_line(f))
             except ValueError:
-                assert False, (
-                    "/!\\ ERROR: Invalid input file - ladder fall probability"
-                )
+                assert False, "/!\\ ERROR: Invalid input file - ladder fall probability"
             try:
                 self.collision_penalty = float(get_line(f))
             except ValueError:
@@ -199,29 +200,45 @@ class GameEnv:
         """
         return GameState(self.init_row, self.init_col)
 
-    def check_collision(self, state, movement, direction, trapdoor_open):
-        """Check if a collision occurs when travelling based on the given movement."""
-        next_row, next_col = state.row, state.col
+    def apply_movement(self, state, movement, direction, trapdoor_open):
+        """
+        Apply movement in specified direction and check if it results in a collision or game over.
+        :param state: state to start movement from
+        :param movement: movement to apply
+        :param direction: direction to apply movement to
+        :param trapdoor_open: bool whether a trapdoor has opened beneath player or not
+        :return: (collision [True/False], game_over [True/False], next_state [GameState])
+        """
+        next_state = state.deepcopy()
         for move_row in range(1, movement[0] + 1):
             check_row = state.row + (move_row * direction[0])
             if self.grid_data[check_row][state.col] == self.SOLID_TILE or (
                 not 0 <= check_row < self.n_rows
             ):
-                return True, GameState(next_row, next_col)
-            elif self.grid_data[check_row][state.col] == self.TRAPDOOR and not trapdoor_open:
-                return True, GameState(next_row, next_col)
+                return True, False, next_state
+            elif (
+                self.grid_data[check_row][state.col] == self.TRAPDOOR
+                and not trapdoor_open
+            ):
+                return True, False, next_state
             else:
-                next_row = check_row
+                next_state = GameState(check_row, state.col)
+                if self.is_game_over(next_state):
+                    return False, True, next_state
 
         for move_col in range(1, movement[1] + 1):
             check_col = state.col + (move_col * direction[1])
-            if self.grid_data[state.row][check_col] in (self.SOLID_TILE, self.TRAPDOOR) or (not 0 <= check_col < self.n_cols):
-                return True, GameState(next_row, next_col)
+            if self.grid_data[state.row][check_col] in (
+                self.SOLID_TILE,
+                self.TRAPDOOR,
+            ) or (not 0 <= check_col < self.n_cols):
+                return True, False, next_state
             else:
-                next_col = check_col
+                next_state = GameState(state.row, check_col)
+                if self.is_game_over(next_state):
+                    return False, True, next_state
 
-        return False, GameState(next_row, next_col)
-
+        return False, False, next_state
 
     def perform_action(self, state, action, seed=None):
         """
@@ -233,7 +250,9 @@ class GameEnv:
         :return: (action_is_valid [True/False], received_reward [float], next_state [GameState],
                     state_is_terminal [True/False])
         """
-        assert action in self.ACTIONS, "/!\\ ERROR: Invalid action given to perform_action()"
+        assert action in self.ACTIONS, (
+            "/!\\ ERROR: Invalid action given to perform_action()"
+        )
         standing_tile = self.grid_data[state.row + 1][state.col]
 
         # Check if the action is valid for the given state
@@ -253,7 +272,6 @@ class GameEnv:
         random.seed(seed)
         reward = -1 * self.ACTION_COST[action]
         trapdoor_open = False
-        game_over = False
         movement = (0, 0)
         direction = (0, 0)
 
@@ -278,7 +296,10 @@ class GameEnv:
                 movement = (1, 0)
                 direction = (1, 0)
                 trapdoor_open = True
-            elif standing_tile == self.LADDER_TILE and random.random() < self.ladder_fall_prob:
+            elif (
+                standing_tile == self.LADDER_TILE
+                and random.random() < self.ladder_fall_prob
+            ):
                 movement = (2, 0)
                 direction = (1, 0)
 
@@ -306,13 +327,16 @@ class GameEnv:
             movement = (1, 0)
             direction = (1, 0)
 
-        collision, next_state = self.check_collision(state, movement, direction, trapdoor_open)
-        if collision:
+        collision, game_over, next_state = self.apply_movement(
+            state, movement, direction, trapdoor_open
+        )
+
+        if game_over:
+            reward -= self.game_over_penalty
+        elif collision:
             reward -= self.collision_penalty
 
         return True, reward, next_state, game_over or self.is_solved(next_state)
-
-
 
     def is_solved(self, state):
         """
@@ -321,6 +345,17 @@ class GameEnv:
         :return: True if solved, False otherwise
         """
         return state.row == self.goal_row and state.col == self.goal_col
+
+    def is_game_over(self, state):
+        """
+        Check if a game over situation has occurred (i.e. player has entered on a lava tile)
+        :param state: current GameState
+        :return: True if game over, False otherwise
+        """
+        assert 0 < state.row < self.n_rows - 1 and 0 < state.col < self.n_cols - 1, (
+            "!!! /!\\ ERROR: Invalid player coordinates !!!"
+        )
+        return self.grid_data[state.row][state.col] == self.CHEESE_TRAP
 
     def render(self, state):
         """

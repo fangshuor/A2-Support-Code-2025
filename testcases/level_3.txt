@@ -1,38 +1,41 @@
-# num rows, num cols
+# n_rows, n_cols
 13, 22
-# cost targets (min score target, max score target)
-178.0, 89.0
-# nodes targets (min score target, max score target)
-550, 490
-# UCS run time targets (min score target, max score target)
-0.0100, 0.0070
-# A* run time targets (min score target, max score target)
-0.0075, 0.0065
-# grid data
+# gamma, epsilon
+0.999, 0.0001
+# VI time targets (min score target, max score target)
+0.10, 0.05
+# PI time targets (min score target, max score target)
+1.6, 0.8
+# VI iterations targets (min score target, max score target)
+266, 133
+# PI iterations targets (min score target, max score target)
+88, 44
+# reward target
+-210.6, -105.3
+# trapdoor probability
+0.4
+# jump probability
+0.1
+# walking probabilities
+0.2, 0.6, 0.2
+# ladder fall probability
+0.2
+# collision penalty
+1.0
+# game over penalty
+500.0
+# episode seed
+1894
 XXXXXXXXXXXXXXXXXXXXXX
 X                    X
-X XXXXXXXXXXXXXXXXXX=X
-X XL               X=X
-X XXXXXXXXXXXXXXXX=X=X
-X                 =X=X
+X XXXTXXXXXXTXXXXTXX=X
+X X                X=X
+X XTXXTXXXTXXXXXXX=X=X
+X         C       =X=X
 X XXTXTXXXXXXXXXXX=X=X
-X XX    LXXXXXXXXX=X=X
+X XX     XXXXXXXXX=X=X
 X XX    =XXXXXXXXX=X=X
 X GX    =         =X=X
-XXXX    =XXDXXXXXXXX=X
-XP     L=           =X
+XXXX    =XXTXXXXXXXX=X
+XP      =           =X
 XXXXXXXXXXXXXXXXXXXXXX
-# Schematic
-
-
-
-   1
-
-
-    2 1
-        2
-
-
-           3
-       3
-

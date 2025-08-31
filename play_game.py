@@ -1,7 +1,8 @@
 import sys
+import time
 
 from game_env import GameEnv
-from gui import GUI
+from gui import Viewer
 
 """
 play_game.py
@@ -15,7 +16,9 @@ The script takes 1 argument:
 When prompted for an action, type one of the available action strings (e.g. wr, wl, etc) and press enter to perform the
 entered action.
 
-COMP3702 Assignment 1 "Cheese Hunter" Support Code, 2025
+COMP3702 Assignment 2 "Dragon Game" Support Code
+
+Last updated by njc 29/08/23
 """
 
 
@@ -28,35 +31,40 @@ def main(arglist):
     input_file = arglist[0]
 
     game_env = GameEnv(input_file)
-    gui = GUI(game_env)
+    viewer = Viewer(game_env)
     persistent_state = game_env.get_init_state()
-    actions = []
-    total_cost = 0
+    total_reward = 0
 
-    print('Available actions: wl, wr, sl, sr, j, c, d, a, q[quit]')
-
-    # Run simulation
+    # run simulation
     while True:
-        gui.update_state(persistent_state)
-        print('Choose an action >>', end=' ')
+        viewer.update_state(persistent_state)
+        print("Choose an action (wr, wl, j, c, d, q - quitting) >>", end=" ")
         a = input().strip()
-        if 'q' in a:
-            print('Quitting.')
-            break
-        if a not in GameEnv.ACTIONS:
-            print('Invalid action. Choose again.')
-            continue
-        actions.append(a)
-        total_cost += game_env.ACTION_COST[a]
-        success, persistent_state = game_env.perform_action(persistent_state, a)
-        if not success:
-            print('Collision occurred or invalid action. Please try a different action.')
-        if game_env.is_solved(persistent_state):
-            gui.update_state(persistent_state)
-            print(f'Level completed with total cost of {round(total_cost, 1)}!')
-            break
 
-    return 0
+        if 'q' in a:
+            print('\nQuitting.')
+            break
+        valid, reward, new_state, terminal = game_env.perform_action(persistent_state, a, seed=time.time())
+        if not valid:
+            print('Action is invalid for the current state. Choose again.')
+            continue
+        else:
+            persistent_state = new_state
+        total_reward += reward
+
+        if terminal:
+            print(f'Received reward: {reward} | Total reward: {round(total_reward, 1)}')
+            viewer.update_state(persistent_state)
+            if reward > (-1 * game_env.game_over_penalty):
+                print(f'Level completed with total reward of {round(total_reward, 1)} '
+                      f'(target reward = {game_env.reward_max_tgt})')
+                break
+            else:
+                print(f'Game Over, with total reward of {round(total_reward, 1)} '
+                      f'(target reward = {game_env.reward_max_tgt})')
+                break
+        else:
+            print(f'Received reward: {reward} | Total reward: {round(total_reward, 1)}', end='\r')
 
 
 if __name__ == '__main__':

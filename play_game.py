@@ -16,9 +16,7 @@ The script takes 1 argument:
 When prompted for an action, type one of the available action strings (e.g. wr, wl, etc) and press enter to perform the
 entered action.
 
-COMP3702 Assignment 2 "Dragon Game" Support Code
-
-Last updated by njc 29/08/23
+COMP3702 Assignment 2 "Cheese Hunter" Support Code, 2025.
 """
 
 

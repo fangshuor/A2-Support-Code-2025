@@ -6,7 +6,7 @@ from game_env import GameEnv
 """
 Graphical Visualiser for Cheese Hunter. You may modify this file if desired.
 
-COMP3702 Assignment 1 "Cheese Hunter" Support Code, 2025
+COMP3702 Assignment 2 "Cheese Hunter" Support Code, 2025
 """
 
 

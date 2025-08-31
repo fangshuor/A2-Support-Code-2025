@@ -1,3 +1,5 @@
+import random
+
 from game_state import GameState
 
 """
@@ -28,16 +30,13 @@ class GameEnv:
     LADDER_TILE = "="
     AIR_TILE = " "
     TRAPDOOR = "T"
-    DRAWBRIDGE = "D"
     GOAL_TILE = "G"
     PLAYER_TILE = "P"
-    LEVER = "L"
     VALID_TILES = {
         SOLID_TILE,
         LADDER_TILE,
         AIR_TILE,
         TRAPDOOR,
-        DRAWBRIDGE,
         GOAL_TILE,
         PLAYER_TILE,
     }
@@ -45,31 +44,22 @@ class GameEnv:
     # Action symbols (i.e. output file symbols)
     WALK_LEFT = "wl"
     WALK_RIGHT = "wr"
+    JUMP = "j"
     CLIMB = "c"
     DROP = "d"
-    ACTIVATE = "a"
-    JUMP = "j"
-    SPRINT_LEFT = "sl"
-    SPRINT_RIGHT = "sr"
     ACTIONS = {
         WALK_LEFT,
         WALK_RIGHT,
         CLIMB,
         DROP,
-        ACTIVATE,
         JUMP,
-        SPRINT_LEFT,
-        SPRINT_RIGHT,
     }
     ACTION_COST = {
         WALK_LEFT: 1.0,
         WALK_RIGHT: 1.0,
         CLIMB: 2.0,
         DROP: 0.5,
-        ACTIVATE: 1.0,
         JUMP: 2.0,
-        SPRINT_LEFT: 1.9,
-        SPRINT_RIGHT: 1.9,
     }
 
     def __init__(self, filename):
@@ -77,97 +67,100 @@ class GameEnv:
         Process the given input file and create a new game environment instance based on the input file.
         :param filename: name of input file
         """
-        try:
-            f = open(filename, "r")
-        except FileNotFoundError:
-            assert False, "/!\\ ERROR: Testcase file not found"
-
-        grid_data = []
-        schematic_data = []
-        reading_schematic = False
-        i = 0
-        for line in f:
-            # Check if we've hit the schematic section
-            if line.strip().startswith("# Schematic"):
-                reading_schematic = True
-                continue
-
-            # Skip annotations in input file
-            if line.strip().startswith("#"):
-                continue
-
-            if reading_schematic:
-                # Read schematic grid data
-                if len(line.rstrip()) <= self.n_cols:
-                    schematic_data.append(list(line.rstrip().ljust(self.n_cols)))
-                continue
-
-            if i == 0:
-                try:
-                    # Number of rows and columns in lever
-                    self.n_rows, self.n_cols = tuple(
-                        [int(x) for x in line.strip().split(",")]
-                    )
-                except ValueError:
-                    assert False, (
-                        f"/!\\ ERROR: Invalid input file - n_rows and n_cols (line {i})"
-                    )
-
-            elif i == 1:
-                try:
-                    # Cost targets - used for both UCS and A*
-                    self.cost_min_tgt, self.cost_max_tgt = tuple(
-                        [float(x) for x in line.strip().split(",")]
-                    )
-                except ValueError:
-                    assert False, (
-                        f"/!\\ ERROR: Invalid input file - cost targets (line {i})"
-                    )
-
-            elif i == 2:
-                try:
-                    # Nodes expanded targets - used for A* heuristic eval only
-                    self.nodes_min_tgt, self.nodes_max_tgt = tuple(
-                        [float(x) for x in line.strip().split(",")]
-                    )
-                except ValueError:
-                    assert False, (
-                        f"/!\\ ERROR: Invalid input file - nodes targets (line {i})"
-                    )
-
-            elif i == 3:
-                try:
-                    # UCS target times
-                    self.ucs_time_min_tgt, self.ucs_time_max_tgt = tuple(
-                        [float(x) for x in line.strip().split(",")]
-                    )
-                except ValueError:
-                    assert False, (
-                        f"/!\\ ERROR: Invalid input file - UCS time targets (line {i})"
-                    )
-
-            elif i == 4:
-                try:
-                    # A* target times
-                    self.a_star_time_min_tgt, self.a_star_time_max_tgt = tuple(
-                        [float(x) for x in line.strip().split(",")]
-                    )
-                except ValueError:
-                    assert False, (
-                        f"/!\\ ERROR: Invalid input file - A* time targets (line {i})"
-                    )
-
-            elif len(line.strip()) > 0:
-                grid_data.append(list(line.strip()))
-                assert len(grid_data[-1]) == self.n_cols, (
-                    f"/!\\ ERROR: Invalid input file - incorrect map row length (line {i})"
+        with open(filename, "r") as f:
+            # read testcase parameters
+            try:
+                self.n_rows, self.n_cols = tuple(
+                    [int(x) for x in get_line(f).split(",")]
                 )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - n_rows and n_cols"
+            try:
+                self.gamma, self.epsilon = tuple(
+                    [float(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - gamma and epsilon"
+            try:
+                self.vi_time_min_tgt, self.vi_time_max_tgt = tuple(
+                    [float(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - VI time targets"
+            try:
+                self.pi_time_min_tgt, self.pi_time_max_tgt = tuple(
+                    [float(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - PI time targets"
+            try:
+                self.vi_iter_min_tgt, self.vi_iter_max_tgt = tuple(
+                    [int(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - VI iterations targets"
+            try:
+                self.pi_iter_min_tgt, self.pi_iter_max_tgt = tuple(
+                    [int(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - PI iterations targets"
+            try:
+                self.reward_min_tgt, self.reward_max_tgt = tuple(
+                    [float(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - reward targets"
+            try:
+                self.trapdoor_prob = float(get_line(f))
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - trapdoor probability"
+            try:
+                self.jump_prob = float(get_line(f))
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - jump probability"
+            try:
+                probs = [float(x) for x in get_line(f).split(",")]
+                assert sum(probs) == 1, "/!\\ ERROR: Invalid input file - walking probabilities do not sum to 1"
+                self.walking_probs = [probs[0], probs[1], probs[2]]
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - walking probabilities"
+            try:
+                self.ladder_fall_prob = float(get_line(f))
+            except ValueError:
+                assert False, (
+                    "/!\\ ERROR: Invalid input file - ladder fall probability"
+                )
+            try:
+                self.collision_penalty = float(get_line(f))
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - collision penalty"
+            try:
+                self.game_over_penalty = float(get_line(f))
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - game over penalty"
+            try:
+                self.episode_seed = int(get_line(f))
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - episode seed"
 
-            i += 1
+            # read testcase grid data
+            grid_data = []
+            line = get_line(f)
+            i = 0
+            while line is not None:
+                grid_data.append(list(line))
+                assert len(grid_data[-1]) == self.n_cols, (
+                    f"/!\\ ERROR: Invalid input file - incorrect map row length (row {i})"
+                )
+                line = get_line(f)
+                i += 1
+            assert len(grid_data) == self.n_rows, (
+                "/!\\ ERROR: Invalid input file - incorrect number of rows in map"
+            )
 
-        # Extract initial, goal, trap, and lever positions
+        # Extract initial, goal, and trap positions
         trap_positions = []  # Record positions of traps
-        lever_positions = []  # Record positions of levers
         self.init_row, self.init_col = None, None
         self.goal_row, self.goal_col = None, None
         for r in range(self.n_rows):
@@ -186,12 +179,8 @@ class GameEnv:
                     self.goal_row, self.goal_col = r, c
                     # assume exit is placed on air tile
                     grid_data[r][c] = self.AIR_TILE
-                elif grid_data[r][c] == self.DRAWBRIDGE:
-                    trap_positions.append((r, c))
                 elif grid_data[r][c] == self.TRAPDOOR:
                     trap_positions.append((r, c))
-                elif grid_data[r][c] == self.LEVER:
-                    lever_positions.append((r, c))
 
         assert self.init_row is not None and self.init_col is not None, (
             "/!\\ ERROR: Invalid input file - No player initial position"
@@ -200,29 +189,7 @@ class GameEnv:
             "/!\\ ERROR: Invalid input file - No exit position"
         )
 
-        # Store schematic data if available
-        self.schematic_data = schematic_data if schematic_data else None
-
-        # Map lever positions to trap positions using schematic data
-        assert self.schematic_data is not None, (
-            "/!\\ ERROR: Lever-trap mapping requires schematic data in level file"
-        )
-        lever_map_positions = self._create_schematic_mapping(
-            lever_positions, trap_positions
-        )
-
-        self.lever_positions = lever_positions
-        self.lever_map_positions = lever_map_positions
-        self.trap_positions = [
-            lever_map_positions[lever_position] for lever_position in lever_positions
-        ]
-
-        # Create lever-trap mapping grid
-        self.lever_trap_mapping = self._create_lever_trap_mapping_grid()
-
-        assert len(grid_data) == self.n_rows, (
-            "/!\\ ERROR: Invalid input file - incorrect number of map rows"
-        )
+        self.trap_positions = trap_positions
         self.grid_data = grid_data
 
     def get_init_state(self):
@@ -230,215 +197,122 @@ class GameEnv:
         Get a state representation instance for the initial state.
         :return: initial state
         """
-        return GameState(
-            self.init_row, self.init_col, tuple(0 for _ in self.trap_positions)
-        )
+        return GameState(self.init_row, self.init_col)
 
-    def check_valid_action(self, state, action):
-        """Check a given action is able to be performed in a given state.
+    def check_collision(self, state, movement, direction, trapdoor_open):
+        """Check if a collision occurs when travelling based on the given movement."""
+        next_row, next_col = state.row, state.col
+        for move_row in range(1, movement[0] + 1):
+            check_row = state.row + (move_row * direction[0])
+            if self.grid_data[check_row][state.col] == self.SOLID_TILE or (
+                not 0 <= check_row < self.n_rows
+            ):
+                return True, GameState(next_row, next_col)
+            elif self.grid_data[check_row][state.col] == self.TRAPDOOR and not trapdoor_open:
+                return True, GameState(next_row, next_col)
+            else:
+                next_row = check_row
+
+        for move_col in range(1, movement[1] + 1):
+            check_col = state.col + (move_col * direction[1])
+            if self.grid_data[state.row][check_col] in (self.SOLID_TILE, self.TRAPDOOR) or (not 0 <= check_col < self.n_cols):
+                return True, GameState(next_row, next_col)
+            else:
+                next_col = check_col
+
+        return False, GameState(next_row, next_col)
+
+
+    def perform_action(self, state, action, seed=None):
+        """
+        Perform the given action on the given state, sample an outcome, and return whether the action was valid, and if
+        so, the received reward, the resulting new state and whether the new state is terminal.
         :param state: current GameState
         :param action: an element of self.ACTIONS
-        :return: successful [True/False]
+        :param seed: random number generator seed (for consistent outcomes between runs)
+        :return: (action_is_valid [True/False], received_reward [float], next_state [GameState],
+                    state_is_terminal [True/False])
         """
-        floor_tile = self.grid_data[state.row + 1][state.col]
-        if action in (
-            self.WALK_LEFT,
-            self.WALK_RIGHT,
-            self.SPRINT_LEFT,
-            self.SPRINT_RIGHT,
-            self.JUMP,
-        ):
-            if action == self.SPRINT_LEFT:
-                if (
-                    self.grid_data[state.row + 1][state.col - 1]
-                    in (self.TRAPDOOR, self.DRAWBRIDGE)
-                    and state.trap_status[
-                        self.trap_positions.index((state.row + 1, state.col - 1))
-                    ]
-                    == 0
-                ):
-                    # Cannot sprint over open trap
-                    return False
-                elif self.grid_data[state.row][state.col - 1] not in (
-                    self.AIR_TILE,
-                    self.LADDER_TILE,
-                    self.LEVER,
-                ):
-                    # Cannot sprint through solid block
-                    return False
-                elif self.grid_data[state.row + 1][state.col - 1] not in (
-                    self.SOLID_TILE,
-                    self.DRAWBRIDGE,
-                    self.TRAPDOOR,
-                    self.LADDER_TILE,
-                ):
-                    # Cannot sprint over air
-                    return False
-            elif action == self.SPRINT_RIGHT:
-                if (
-                    self.grid_data[state.row + 1][state.col + 1]
-                    in (self.TRAPDOOR, self.DRAWBRIDGE)
-                    and state.trap_status[
-                        self.trap_positions.index((state.row + 1, state.col + 1))
-                    ]
-                    == 0
-                ):
-                    # Cannot sprint over open trap
-                    return False
-                elif self.grid_data[state.row][state.col + 1] not in (
-                    self.AIR_TILE,
-                    self.LADDER_TILE,
-                    self.LEVER,
-                ):
-                    # Cannot sprint through solid block
-                    return False
-                elif self.grid_data[state.row + 1][state.col + 1] not in (
-                    self.SOLID_TILE,
-                    self.DRAWBRIDGE,
-                    self.TRAPDOOR,
-                    self.LADDER_TILE,
-                ):
-                    # Cannot sprint over air
-                    return False
+        assert action in self.ACTIONS, "/!\\ ERROR: Invalid action given to perform_action()"
+        standing_tile = self.grid_data[state.row + 1][state.col]
 
-            if (
-                floor_tile in (self.TRAPDOOR, self.DRAWBRIDGE)
-                and state.trap_status[
-                    self.trap_positions.index((state.row + 1, state.col))
-                ]
-                == 0
-            ):
-                # Cannot walk on a trap that is not locked
-                return False
-            elif floor_tile == self.LADDER_TILE and self.grid_data[state.row][state.col] == self.LADDER_TILE and action == self.JUMP:
-                # Cannot jump while climbing a ladder
-                return False
-            elif floor_tile not in (self.SOLID_TILE, self.DRAWBRIDGE, self.TRAPDOOR, self.LADDER_TILE):
-                # Cannot walk on invalid surface (tiles not listed)
-                return False
-        elif action == self.DROP:
-            if (
-                floor_tile in (self.TRAPDOOR, self.DRAWBRIDGE)
-                and state.trap_status[
-                    self.trap_positions.index((state.row + 1, state.col))
-                ]
-                == 1
-            ):
-                # Cannot drop through locked trap
-                return False
-            elif floor_tile not in (
-                self.LADDER_TILE,
-                self.AIR_TILE,
-                self.DRAWBRIDGE,
-                self.TRAPDOOR,
-                self.LEVER,
-            ):
-                # Cannot drop through invalid tile (tiles not listed)
-                return False
-        elif (
-            action == self.CLIMB
-            and self.grid_data[state.row][state.col] != self.LADDER_TILE
-        ):
-            # Cannot climb on invalid tile (can only climb on ladders)
-            return False
+        # Check if the action is valid for the given state
+        if action in {self.WALK_LEFT, self.WALK_RIGHT, self.JUMP}:
+            if standing_tile not in {self.TRAPDOOR, self.SOLID_TILE, self.LADDER_TILE}:
+                # Prerequisite not satisfied - can only walk/jump on trapdoors, solids, or ladders
+                return False, None, None, None
+        elif action == self.CLIMB:
+            if self.grid_data[state.row][state.col] != self.LADDER_TILE:
+                # Prerequisite not satisfied - must be at ladder to climb
+                return False, None, None, None
+        else:
+            if standing_tile not in {self.AIR_TILE, self.LADDER_TILE}:
+                # Prerequisite not satisfied - can only drop through air or ladder tiles
+                return False, None, None, None
 
-        return True
+        random.seed(seed)
+        reward = -1 * self.ACTION_COST[action]
+        trapdoor_open = False
+        game_over = False
+        movement = (0, 0)
+        direction = (0, 0)
 
-    def check_collision(self, next_position, next_trap_status):
-        """Check a given action is able to be performed in a given state.
-        :param next_position: next position of player based on action
-        :param next_trap_status: trap status of new state
-        :return: collision [True/False]
-        """
-        next_row, next_col = next_position
-        # Check that next_state is within bounds
-        if not (0 <= next_row < self.n_rows and 0 <= next_col < self.n_cols):
-            # Next state is out of bounds
-            return True
+        # Handle each action type separately
+        if action in {self.WALK_LEFT, self.WALK_RIGHT}:
+            # Get direction
+            if action == self.WALK_LEFT:
+                direction = (0, -1)
+            else:
+                direction = (0, 1)
 
-        # Check for a collision (with either next state or a closed drawbridge)
-        if self.grid_data[next_row][next_col] == self.SOLID_TILE:
-            # Collision with a solid tile
-            return True
+            rn = random.random()
+            cumulative_prob = 0
+            for idx, prob in enumerate(self.walking_probs):
+                cumulative_prob += prob
+                if rn < cumulative_prob:
+                    movement = (0, idx)
+                    break
 
-        elif (
-            self.grid_data[next_row + 1][next_col] == self.DRAWBRIDGE
-            and next_trap_status[self.trap_positions.index((next_row + 1, next_col))]
-            == 0
-        ):
-            # Collision with a closed drawbridge
-            return True
-
-        return False
-
-    def perform_action(self, state, action):
-        """
-        Perform the given action on the given state, and return whether the
-        action was successful (i.e. valid and collision free) and the resulting
-        new state.
-        :param state: current GameState
-        :param action: an element of self.ACTIONS
-        :return: (successful [True/False], next_state [GameState])
-        """
-
-        # Check action is valid
-        if not self.check_valid_action(state, action):
-            return False, state.deepcopy()
-
-        next_trap_status = list(state.trap_status)
-        # Get coordinates for next state
-        if action == self.WALK_LEFT:
-            next_row, next_col = (state.row, state.col - 1)  # left
-
-        elif action == self.WALK_RIGHT:
-            next_row, next_col = (state.row, state.col + 1)  # right
-
-        elif action == self.SPRINT_LEFT:
-            next_row, next_col = (state.row, state.col - 2)  # left 2
-
-        elif action == self.SPRINT_RIGHT:
-            next_row, next_col = (state.row, state.col + 2)  # right 2
+            # Handle differently based on where player is standing
+            if standing_tile == self.TRAPDOOR and random.random() < self.trapdoor_prob:
+                movement = (1, 0)
+                direction = (1, 0)
+                trapdoor_open = True
+            elif standing_tile == self.LADDER_TILE and random.random() < self.ladder_fall_prob:
+                movement = (2, 0)
+                direction = (1, 0)
 
         elif action == self.JUMP:
-            next_row, next_col = (state.row - 1, state.col)  # up (jump)
+            direction = (-1, 0)
+            if random.random() < self.jump_prob:
+                movement = (2, 0)
+            else:
+                movement = (1, 0)
+
+            if standing_tile == self.TRAPDOOR and random.random() < self.trapdoor_prob:
+                movement = (1, 0)
+                direction = (-1, 0)
+                trapdoor_open = True
 
         elif action == self.CLIMB:
-            next_row, next_col = (state.row - 1, state.col)  # up (climb)
+            if random.random() < self.ladder_fall_prob:
+                movement = (2, 0)
+                direction = (1, 0)
+            else:
+                movement = (1, 0)
+                direction = (-1, 0)
 
         elif action == self.DROP:
-            next_row, next_col = (state.row + 1, state.col)  # down
+            movement = (1, 0)
+            direction = (1, 0)
 
-        elif action == self.ACTIVATE:  # activate lever
-            # Check if player is on a lever tile
-            # Activate trap if they are on a lever tile
-            next_row, next_col = state.row, state.col
+        collision, next_state = self.check_collision(state, movement, direction, trapdoor_open)
+        if collision:
+            reward -= self.collision_penalty
 
-            if (state.row, state.col) in self.lever_map_positions.keys():
-                # Player is on a lever
-                trap_pos = self.lever_map_positions[(state.row, state.col)]
+        return True, reward, next_state, game_over or self.is_solved(next_state)
 
-                if state.trap_status[self.trap_positions.index(trap_pos)] == 0:
-                    # Activate lever
-                    next_trap_status[
-                        self.trap_positions.index(
-                            self.lever_map_positions[(state.row, state.col)]
-                        )
-                    ] = 1
-                else:
-                    # Deactivate lever
-                    next_trap_status[
-                        self.trap_positions.index(
-                            self.lever_map_positions[(state.row, state.col)]
-                        )
-                    ] = 0
 
-        else:
-            assert False, "/!\\ ERROR: Invalid action given to perform_action()"
-
-        if self.check_collision((next_row, next_col), next_trap_status):
-            return False, state.deepcopy()
-
-        return True, GameState(next_row, next_col, tuple(next_trap_status))
 
     def is_solved(self, state):
         """
@@ -446,16 +320,7 @@ class GameEnv:
         :param state: current GameState
         :return: True if solved, False otherwise
         """
-        all_traps_activated = True
-        for status in state.trap_status:
-            if status == 0:
-                all_traps_activated = False
-                break
-        return (
-            state.row == self.goal_row
-            and state.col == self.goal_col
-            and all_traps_activated
-        )
+        return state.row == self.goal_row and state.col == self.goal_col
 
     def render(self, state):
         """
@@ -585,3 +450,11 @@ class GameEnv:
             bool: True if position is a lever or trap
         """
         return self.get_lever_trap_id(row, col) != 0
+
+def get_line(f):
+    line = f.readline()
+    if len(line) == 0:
+        return None
+    while line[0] == '#':
+        line = f.readline()
+    return line.strip()

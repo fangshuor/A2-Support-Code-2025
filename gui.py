@@ -61,11 +61,12 @@ class Viewer:
             self.tile_ladder = tk.PhotoImage(file="gui_assets/Small/ladder.png")
             self.tile_stone = tk.PhotoImage(file="gui_assets/Small/solid_wall.png")
             self.trapdoors_closed = tk.PhotoImage(
-                file="gui_assets/Small/trapdoors/closed_trapdoor.png"
+                file="gui_assets/Small/trapdoor_closed.png"
             )
             self.trapdoors_open = tk.PhotoImage(
-                file="gui_assets/Small/trapdoors/open_trapdoor.png"
+                file="gui_assets/Small/trapdoor_open.png"
             )
+            self.cheese_trap = tk.PhotoImage(file="gui_assets/Small/cheese_trap.png")
 
         else:
             self.background = tk.PhotoImage(file="gui_assets/background_wall.png")
@@ -73,12 +74,9 @@ class Viewer:
             self.tile_cheese = tk.PhotoImage(file="gui_assets/goal_cheese.png")
             self.tile_ladder = tk.PhotoImage(file="gui_assets/ladder.png")
             self.tile_stone = tk.PhotoImage(file="gui_assets/solid_wall.png")
-            self.trapdoors_closed = tk.PhotoImage(
-                file="gui_assets/trapdoors/closed_trapdoor.png"
-            )
-            self.trapdoors_open = tk.PhotoImage(
-                file="gui_assets/trapdoors/open_trapdoor.png"
-            )
+            self.trapdoors_closed = tk.PhotoImage(file="gui_assets/trapdoor_closed.png")
+            self.trapdoors_open = tk.PhotoImage(file="gui_assets/trapdoor_open.png")
+            self.cheese_trap = tk.PhotoImage(file="gui_assets/cheese_trap.png")
 
         # Draw background (all permanent features, i.e. everything except player, traps, and levers)
         for r in range(self.game_env.n_rows):
@@ -113,6 +111,19 @@ class Viewer:
                         image=self.background,
                         anchor=tk.NW,
                     )
+                elif self.game_env.grid_data[r][c] == self.game_env.CHEESE_TRAP:
+                    self.canvas.create_image(
+                        (c * self.tile_w),
+                        (r * self.tile_h),
+                        image=self.background,
+                        anchor=tk.NW,
+                    )
+                    self.canvas.create_image(
+                        (c * self.tile_w),
+                        (r * self.tile_h),
+                        image=self.cheese_trap,
+                        anchor=tk.NW,
+                    )
                 if r == self.game_env.goal_row and c == self.game_env.goal_col:
                     self.canvas.create_image(
                         (c * self.tile_w),
@@ -130,7 +141,6 @@ class Viewer:
 
         self.window.update()
         self.last_update_time = time.time()
-
 
     def update_state(self, state):
         # Delete then redraw all traps

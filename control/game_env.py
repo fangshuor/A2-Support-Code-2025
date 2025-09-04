@@ -1,6 +1,6 @@
 import random
 
-from control.game_state import GameState
+from game_state import GameState
 
 """
 game_env.py
@@ -265,7 +265,7 @@ class GameEnv:
                 # Prerequisite not satisfied - must be at ladder to climb
                 return False, None, None, None
         else:
-            if standing_tile not in {self.AIR_TILE, self.LADDER_TILE}:
+            if standing_tile not in {self.AIR_TILE, self.LADDER_TILE, self.TRAPDOOR, self.CHEESE_TRAP}:
                 # Prerequisite not satisfied - can only drop through air or ladder tiles
                 return False, None, None, None
 
@@ -324,8 +324,12 @@ class GameEnv:
                 direction = (-1, 0)
 
         elif action == self.DROP:
-            movement = (1, 0)
-            direction = (1, 0)
+            if self.grid_data[state.row][state.col] == self.LADDER_TILE and random.random() < self.ladder_fall_prob:
+                movement = (2, 0)
+                direction = (1, 0)
+            else:
+                movement = (1, 0)
+                direction = (1, 0)
 
         collision, game_over, next_state = self.apply_movement(
             state, movement, direction, trapdoor_open

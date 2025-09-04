@@ -35,8 +35,8 @@ class Solver:
         """
         Select which testcases you wish the autograder to test you on.
         The autograder will not run any excluded testcases.
-        e.g. [1, 4, 6] will only run testcases 1, 4, and 6, excluding, 2, 3, and 5.
-        :return: a list containing which testcase numbers to run (testcases in 1-6).
+        e.g. [1, 4, 5] will only run testcases 1, 4, and 5, excluding, 2 and 3.
+        :return: a list containing which testcase numbers to run (testcases in 1-5).
         """
         return [1, 2, 3, 4, 5]
 
@@ -119,7 +119,7 @@ class Solver:
         """
         Retrieve the optimal action for the given state (based on values computed by Value Iteration).
         :param state: the current state
-        :return: optimal action for the given state (element of ROBOT_ACTIONS)
+        :return: optimal action for the given state (element of GameEnv.ACTIONS)
         """
         #
         # TODO: Implement code to return the optimal action for the given state (based on your stored VI values) here.
@@ -183,7 +183,7 @@ class Solver:
         """
         Retrieve the optimal action for the given state (based on values computed by Value Iteration).
         :param state: the current state
-        :return: optimal action for the given state (element of ROBOT_ACTIONS)
+        :return: optimal action for the given state (element of GameEnv.ACTIONS)
         """
         #
         # TODO: Implement code to return the optimal action for the given state (based on your stored PI policy) here.

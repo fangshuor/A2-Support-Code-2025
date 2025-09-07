@@ -83,6 +83,12 @@ class GameEnv:
             except ValueError:
                 assert False, "/!\\ ERROR: Invalid input file - gamma and epsilon"
             try:
+                self.ql_epsilon_start, self.ql_epsilon_end, self.ql_epsilon_decay, self.learning_rate = tuple(
+                    [float(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - QL epsilon start, end, decay, and learning rate"
+            try:
                 self.vi_time_min_tgt, self.vi_time_max_tgt = tuple(
                     [float(x) for x in get_line(f).split(",")]
                 )

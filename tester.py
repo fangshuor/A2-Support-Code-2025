@@ -29,7 +29,7 @@ EPISODE_TRIALS = 50000
 
 def print_usage():
     print("Usage: python tester.py [plan_type] [testcase_file] [-v (optional)]")
-    print("    plan_type = 'vi' or 'pi'")
+    print("    plan_type = 'vi' or 'pi' or 'ql")
     print("    testcase_file = filename of a valid testcase file (e.g. level_1.txt)")
     print("    if -v is specified, the solver's trajectory will be visualised")
 
@@ -50,7 +50,7 @@ def main(arglist):
         return
 
     plan_type = arglist[0]
-    if plan_type not in ['vi', 'pi']:
+    if plan_type not in ['vi', 'pi', 'ql']:
         print("/!\\ ERROR: Invalid plan_type given")
         print_usage()
         return
@@ -119,7 +119,7 @@ def main(arglist):
                 convergence_passed = False
                 break
 
-    else:
+    elif plan_type == 'pi':
         # policy actions for states in validation set - used for convergence check
         vs_policy = {vs: ControlEnv.WALK_LEFT for vs in val_states}
 
@@ -145,6 +145,33 @@ def main(arglist):
             if vs_policy[vs] != solver.pi_select_action(vs):
                 convergence_passed = False
                 break
+
+    else:
+        # Run Q-Learning
+        vs_policy = {vs: ControlEnv.WALK_LEFT for vs in val_states}
+        solver.ql_initialise()
+        while iterations < MAX_ITERATIONS:
+            # read policy for states in validation set for this iteration
+            for vs in val_states:
+                vs_policy[vs] = solver.ql_select_action(vs)
+
+            # perform an iteration
+            t0 = time.time()
+            solver.ql_iteration()
+            t_iter = time.time() - t0
+            if t_iter > max_iter_time:
+                max_iter_time = t_iter
+            iter_time_list.append(t_iter)
+
+            iterations += 1
+
+        # test for convergence
+        convergence_passed = True
+        for vs in val_states:
+            if vs_policy[vs] != solver.ql_select_action(vs):
+                convergence_passed = False
+                break
+        pass
 
     # simulate episode
     level_completed = False
@@ -172,8 +199,11 @@ def main(arglist):
             if plan_type == 'vi':
                 action = solver.vi_select_action(persistent_state)
 
-            else:   # plan_type == 'pi'
+            elif plan_type == 'pi':   # plan_type == 'pi'
                 action = solver.pi_select_action(persistent_state)
+
+            else:
+                action = solver.ql_select_action(persistent_state)
 
             # simulate outcome of action
             seed = (str(control_env.episode_seed) + str(trial) + state_stable_hash(persistent_state) +
@@ -206,7 +236,7 @@ def main(arglist):
     avg_iter_time = sum(iter_time_list) / len(iter_time_list)
 
     msg = f'===== Testcase {testcase_file.split("/")[-1].split(".")[0]} ' \
-          f'{"Value Iteration" if plan_type == "vi" else "Policy Iteration"} =====\n'
+          f'{"Value Iteration" if plan_type == "vi" else "Policy Iteration" if plan_type == "pi" else "Q-Learning"} =====\n'
     msg += f'Number of Iterations: {iterations}    (iterations max target: ' \
            f'{control_env.vi_iter_max_tgt if plan_type == "vi" else control_env.pi_iter_max_tgt})\n'
     msg += f'Average time taken per iteration: {round(avg_iter_time, 4)}    ' \

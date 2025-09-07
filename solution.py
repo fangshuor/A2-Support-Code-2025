@@ -17,6 +17,8 @@ class Solver:
 
     def __init__(self, game_env):
         self.game_env = game_env
+        self.ql_iterations = 0
+        self.ql_epsilon = None
 
         #
         #
@@ -43,13 +45,12 @@ class Solver:
     @staticmethod
     def get_solution():
         """
-        Select which solution you wish the autograder to run, VI (Value Iteration) and/or PI (Policy Iteration).
-        The autograder will only run the specified solution methods.
-        e.g. "both" will run both VI and PI, but "value_iteration" will only run VI and exclude PI.
-        :return: a string containing which search methods to run ("value_iteration" to only run VI, "policy_iteration"
-         to only run PI, and "both" to run both).
+        Select which solution you wish the autograder to run, VI (Value Iteration), PI (Policy Iteration),
+        and/or QL (Q-Learning). The autograder will only run the specified solution methods.
+        :return: a list of strings containing which search methods to run ("value_iteration" to  run VI,
+        "policy_iteration" to run PI, and "q-learning" to run QL).
         """
-        return "both"
+        return ["value_iteration", "policy_iteration", "q-learning"]
 
     # === Value Iteration ==============================================================================================
 
@@ -136,7 +137,7 @@ class Solver:
         """
         #
         # TODO: Implement any initialisation for Policy Iteration (e.g. building a list of states) here. You should not
-        #  perform policy iteration in this method. You should assume an initial policy of always move FORWARDS.
+        #  perform policy iteration in this method.
         #
         # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
         #
@@ -181,12 +182,73 @@ class Solver:
 
     def pi_select_action(self, state: GameState):
         """
-        Retrieve the optimal action for the given state (based on values computed by Value Iteration).
+        Retrieve the optimal action for the given state (based on values computed by Policy Iteration).
         :param state: the current state
         :return: optimal action for the given state (element of GameEnv.ACTIONS)
         """
         #
         # TODO: Implement code to return the optimal action for the given state (based on your stored PI policy) here.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        #
+        pass
+
+    # === Q-Learning =============================================================================================
+
+    def ql_initialise(self):
+        """
+        Initialise any variables required before the start of Q-Learning.
+        """
+        #
+        # TODO: Implement any initialisation for Q-Learning (e.g. building a list of states) here. You should not
+        #         #  perform q-learning in this method.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        #
+        pass
+
+    def ql_iteration(self):
+        """
+        Perform a single iteration of Policy Iteration (i.e. perform one step of policy evaluation and one step of
+        policy improvement).
+        """
+        #
+        # TODO: Implement code to perform a single iteration of Q-Learning here.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        # You should also perform "self.ql_iterations += 1" at the start of an iteration and "self.ql_epsilon_decay()"
+        # at the end of an iteration.
+        #
+        self.ql_iterations += 1
+        self.ql_epsilon_decay()
+
+    def ql_epsilon_decay(self):
+        """
+        Decay the epsilon-greedy value for Q-Learning to choose between exploration vs exploitation.
+        """
+        self.ql_epsilon = max(
+            self.game_env.ql_epsilon_end,
+            self.game_env.ql_epsilon_start
+            * (self.game_env.ql_epsilon_decay**self.ql_iterations),
+        )
+
+    def ql_plan_offline(self):
+        """
+        Plan using Q-Learning.
+        """
+        # !!! In order to ensure compatibility with tester, you should not modify this method !!!
+        self.ql_initialise()
+        while True:
+            self.ql_iteration()
+
+    def ql_select_action(self, state: GameState):
+        """
+        Retrieve the optimal action for the given state (based on values computed by Q-Learning).
+        :param state: the current state
+        :return: optimal action for the given state (element of GameEnv.ACTIONS)
+        """
+        #
+        # TODO: Implement code to return the optimal action for the given state (based on your stored QL policy) here.
         #
         # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
         #

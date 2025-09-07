@@ -76,7 +76,7 @@ Template file for you to implement your solution to Assignment 2.
 
 You should implement each of the method stubs contained in this file. You may add additional methods and/or classes to this file if you wish. You may also create additional source files and import to this file if you wish.
 
-We recommend you implement Value Iteration first, then attempt Policy Iteration after your Value Iteration implementation is working.
+We recommend you implement Value Iteration first, then attempt Policy Iteration after your Value Iteration implementation is working, then Q-Learning.
 
 
 **tester.py**
@@ -84,7 +84,7 @@ We recommend you implement Value Iteration first, then attempt Policy Iteration 
 This file contains a script which can be used to debug and/or evaluate your solution.
 
 The script takes up to 3 command line arguments:
-- search_type, which should be "vi" or "pi"
+- search_type, which should be "vi", "pi", or "ql"
 - testcase_filename, which must be a valid testcase file (e.g. one of the provided files in the testcases directory)
 - (optional) "-v" to enable visualisation of the resulting trajectory
 
@@ -97,10 +97,13 @@ The format of a testcase file is:
 ~~~~~
 n_rows, n_cols
 gamma, epsilon
+q-learning epsilon start, end, decay, learning rate
 VI time targets (min score target, max score target)
 PI time targets (min score target, max score target)
+QL time targets (min score target, max score target)
 VI iterations targets (min score target, max score target)
 PI iterations targets (min score target, max score target)
+QL iterations targets (min score target, max score target)
 reward target
 trapdoor probability
 jump probability

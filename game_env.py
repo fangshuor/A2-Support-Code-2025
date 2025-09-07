@@ -83,6 +83,12 @@ class GameEnv:
             except ValueError:
                 assert False, "/!\\ ERROR: Invalid input file - gamma and epsilon"
             try:
+                self.ql_epsilon_start, self.ql_epsilon_end, self.ql_epsilon_decay, self.learning_rate = tuple(
+                    [float(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - QL epsilon start, end, decay, and learning rate"
+            try:
                 self.vi_time_min_tgt, self.vi_time_max_tgt = tuple(
                     [float(x) for x in get_line(f).split(",")]
                 )
@@ -379,116 +385,6 @@ class GameEnv:
             print(line)
         print("\n" * 2)
 
-    def _create_schematic_mapping(self, lever_positions, trap_positions):
-        """
-        Create lever-to-trap mapping based on schematic data.
-
-        Args:
-            lever_positions: List of lever coordinate tuples
-            trap_positions: List of trap coordinate tuples
-
-        Returns:
-            dict: Mapping from lever positions to trap positions
-        """
-        lever_map_positions = {}
-
-        # Map levers to traps based on shared IDs in schematic
-        for lever_pos in lever_positions:
-            lever_row, lever_col = lever_pos
-            if lever_row < len(self.schematic_data) and lever_col < len(
-                self.schematic_data[lever_row]
-            ):
-                schematic_char = self.schematic_data[lever_row][lever_col]
-                # Find the trap with the same ID
-                for trap_pos in trap_positions:
-                    trap_row, trap_col = trap_pos
-                    if (
-                        trap_row < len(self.schematic_data)
-                        and trap_col < len(self.schematic_data[trap_row])
-                        and self.schematic_data[trap_row][trap_col] == schematic_char
-                    ):
-                        lever_map_positions[lever_pos] = trap_pos
-                        break
-
-        # Ensure all levers are mapped
-        assert len(lever_map_positions) == len(lever_positions), (
-            f"/!\\ ERROR: Not all levers could be mapped via schematic. "
-            f"Mapped {len(lever_map_positions)} of {len(lever_positions)} levers."
-        )
-
-        return lever_map_positions
-
-    def _create_lever_trap_mapping_grid(self):
-        """
-        Create a mapping grid where lever-trap pairs share the same ID number.
-
-        Returns:
-            2D list where non-zero values indicate lever-trap relationships
-        """
-        # Initialize mapping grid with zeros
-        mapping_grid = [[0 for _ in range(self.n_cols)] for _ in range(self.n_rows)]
-
-        # Assign unique IDs to each lever-trap pair
-        pair_id = 1
-
-        for lever_pos in self.lever_positions:
-            trap_pos = self.lever_map_positions[lever_pos]
-
-            # Assign same ID to both lever and trap positions
-            mapping_grid[lever_pos[0]][lever_pos[1]] = pair_id
-            mapping_grid[trap_pos[0]][trap_pos[1]] = pair_id
-
-            pair_id += 1
-
-        return mapping_grid
-
-    def get_lever_trap_id(self, row, col):
-        """
-        Get the lever-trap pair ID for a given position.
-
-        Args:
-            row, col: Grid coordinates
-
-        Returns:
-            int: Pair ID (0 if position not part of any lever-trap system)
-        """
-        if 0 <= row < self.n_rows and 0 <= col < self.n_cols:
-            return self.lever_trap_mapping[row][col]
-        return 0
-
-    def get_related_positions(self, row, col):
-        """
-        Get all positions related to the given position via lever-trap relationships.
-
-        Args:
-            row, col: Grid coordinates
-
-        Returns:
-            list: List of (row, col) tuples that are connected via lever-trap system
-        """
-        pair_id = self.get_lever_trap_id(row, col)
-        if pair_id == 0:
-            return []
-
-        related_positions = []
-        for r in range(self.n_rows):
-            for c in range(self.n_cols):
-                if self.lever_trap_mapping[r][c] == pair_id:
-                    related_positions.append((r, c))
-
-        return related_positions
-
-    def is_lever_trap_position(self, row, col):
-        """
-        Check if a position is part of any lever-trap system.
-
-        Args:
-            row, col: Grid coordinates
-
-        Returns:
-            bool: True if position is a lever or trap
-        """
-        return self.get_lever_trap_id(row, col) != 0
 
 def get_line(f):
     line = f.readline()

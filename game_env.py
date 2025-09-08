@@ -101,6 +101,12 @@ class GameEnv:
             except ValueError:
                 assert False, "/!\\ ERROR: Invalid input file - PI time targets"
             try:
+                self.ql_time_min_tgt, self.ql_time_max_tgt = tuple(
+                    [float(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - QL time targets"
+            try:
                 self.vi_iter_min_tgt, self.vi_iter_max_tgt = tuple(
                     [int(x) for x in get_line(f).split(",")]
                 )
@@ -112,6 +118,12 @@ class GameEnv:
                 )
             except ValueError:
                 assert False, "/!\\ ERROR: Invalid input file - PI iterations targets"
+            try:
+                self.ql_iter_min_tgt, self.ql_iter_max_tgt = tuple(
+                    [int(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - QL iterations targets"
             try:
                 self.reward_min_tgt, self.reward_max_tgt = tuple(
                     [float(x) for x in get_line(f).split(",")]

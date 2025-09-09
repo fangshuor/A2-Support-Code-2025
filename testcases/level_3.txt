@@ -14,8 +14,6 @@
 1512, 756
 # PI iterations targets (min score target, max score target)
 30, 15
-# QL iterations targets (min score target, max score target)
-88, 44
 # reward target
 -807.2, -403.6
 # trapdoor probability

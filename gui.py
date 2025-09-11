@@ -21,7 +21,6 @@ class Viewer:
     TWEEN_DELAY = 0.005
 
     def __init__(self, game_env):
-        self.lever_images = None
         self.trap_images = None
         self.game_env = game_env
         init_state = game_env.get_init_state()
@@ -78,7 +77,7 @@ class Viewer:
             self.trapdoors_open = tk.PhotoImage(file="gui_assets/trapdoor_open.png")
             self.cheese_trap = tk.PhotoImage(file="gui_assets/cheese_trap.png")
 
-        # Draw background (all permanent features, i.e. everything except player, traps, and levers)
+        # Draw background (all permanent features, i.e. everything except player, traps)
         for r in range(self.game_env.n_rows):
             for c in range(self.game_env.n_cols):
                 if self.game_env.grid_data[r][c] == GameEnv.SOLID_TILE:

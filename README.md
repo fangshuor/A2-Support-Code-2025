@@ -6,7 +6,7 @@ The following files are provided:
 
 **game_env.py**
 
-This file contains a class representing a Cheese Hunter level environment, storing the dimensions of the environment, initial player position, exit (cheese) position, lever positions, trap positions, mapping of levers to traps, targets for path cost, run time and number of nodes expanded, the tile type of each grid position, and a list of all available actions.
+This file contains a class representing a Cheese Hunter level environment, storing the dimensions of the environment, initial player position, exit (cheese) position, trap positions, targets for path cost, run time and number of nodes expanded, the tile type of each grid position, and a list of all available actions.
 
 This file contains a number of functions which will be useful in developing your solver:
 
@@ -25,8 +25,7 @@ Returns a GameState object (see below) representing the initial state of the lev
 ~~~~~
 perform_action(state, action)
 ~~~~~
-Simulates the outcome of performing the given 'action' starting from the given 'state', where 'action' is an element of GameEnv.ACTIONS and 'state' is a GameState object. Returns a tuple (valid, reward, next_state, terminal), where success is True (if the action can be performed) or False (if the action is cannot be performed), reward is a float of the reward received from performing the action from the state, next_state is a GameState
-object of the next state the player ends up in, and terminal is True (if the state is solved or game over) or False (if the state is not solved or game over).
+Simulates the outcome of performing the given 'action' starting from the given 'state', where 'action' is an element of GameEnv.ACTIONS and 'state' is a GameState object. Returns a tuple (success, reward, next_state, terminal), where success is True (if the action can be performed) or False (if the action is cannot be performed), reward is a float of the reward received from performing the action from the state, next_state is a GameState object of the next state the player ends up in, and terminal is True (if the state is solved or game over) or False (if the state is not solved or game over).
 
 
 ~~~~~
@@ -49,7 +48,7 @@ Prints a graphical representation of the given 'state' (a GameState object) to t
 
 **game_state.py**
 
-This file contains a class representing a Cheese Hunter state, storing the position of the player and the status of all levers/traps in the level (1 for activated, 0 for unactivated).
+This file contains a class representing a Cheese Hunter state, storing the position of the player in the level.
 
 ~~~~~
 __init__(row, col)
@@ -103,7 +102,6 @@ PI time targets (min score target, max score target)
 QL time targets (min score target, max score target)
 VI iterations targets (min score target, max score target)
 PI iterations targets (min score target, max score target)
-QL iterations targets (min score target, max score target)
 reward target
 trapdoor probability
 jump probability

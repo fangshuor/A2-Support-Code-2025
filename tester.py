@@ -234,22 +234,36 @@ def main(arglist):
 
     # average time per iteration
     avg_iter_time = sum(iter_time_list) / len(iter_time_list)
+    if plan_type in ['vi', 'pi']:
+        convergence_criteria = "Values" if plan_type == 'vi' else "Policy"
 
-    msg = f'===== Testcase {testcase_file.split("/")[-1].split(".")[0]} ' \
-          f'{"Value Iteration" if plan_type == "vi" else "Policy Iteration" if plan_type == "pi" else "Q-Learning"} =====\n'
-    msg += f'Number of Iterations: {iterations}    (iterations max target: ' \
-           f'{control_env.vi_iter_max_tgt if plan_type == "vi" else control_env.pi_iter_max_tgt})\n'
-    msg += f'Average time taken per iteration: {round(avg_iter_time, 4)}    ' \
-           f'(average time max target: ' \
-           f'{control_env.vi_time_max_tgt if plan_type == "vi" else control_env.pi_time_max_tgt})\n'
-    msg += f'Maximum time taken per iteration: {round(max_iter_time, 4)}\n'
-    msg += ('Values converged!\n' if convergence_passed else
-            'Values failed to converge within the maximum number of iterations.\n')
-    if level_completed:
-        msg += f'Level completed!\nTotal reward: {round(avg_reward, 1)}    ' \
-               f'(reward max target: {control_env.reward_max_tgt})\n'
+        msg = f'===== Testcase {testcase_file.split("/")[-1].split(".")[0]} ' \
+              f'{"Value Iteration" if plan_type == "vi" else "Policy Iteration"} =====\n'
+        msg += f'Number of Iterations: {iterations}    (iterations max target: ' \
+               f'{control_env.vi_iter_max_tgt if plan_type == "vi" else control_env.pi_iter_max_tgt})\n'
+        msg += f'Average time taken per iteration: {round(avg_iter_time, 4)}    ' \
+               f'(average time max target: ' \
+               f'{control_env.vi_time_max_tgt if plan_type == "vi" else control_env.pi_time_max_tgt})\n'
+        msg += f'Maximum time taken per iteration: {round(max_iter_time, 4)}\n'
+        msg += (f'{convergence_criteria} converged!\n' if convergence_passed else
+                f'{convergence_criteria} failed to converge within the maximum number of iterations.\n')
+        if level_completed:
+            msg += (
+                f"Level completed!\nTotal reward: {round(avg_reward, 1)}    "
+                f"(reward max target: {control_env.reward_max_tgt})\n"
+            )
+        else:
+            msg += "Level not completed before reward went below reward min target.\n"
     else:
-        msg += 'Level not completed before reward went below reward min target.\n'
+        msg = (
+            f"===== Testcase {testcase_file.split('/')[-1].split('.')[0]} "
+            f"Q-Learning =====\n"
+        )
+        msg += (
+            f"Average time taken per iteration: {round(avg_iter_time, 4)}    "
+            f"(average time max target: {control_env.ql_time_max_tgt})\n"
+        )
+        msg += f"Maximum time taken per iteration: {round(max_iter_time, 4)}\n"
     print(msg)
 
 

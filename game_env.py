@@ -15,7 +15,7 @@ COMP3702 Assignment 2 "Cheese Hunter" Support Code, 2025
 class GameEnv:
     """
     Instance of a Cheese Hunter environment. Stores the dimensions of the environment, initial player position,
-    goal position, lever positions, trap positions, mapping of levers to traps, time limit, cost target,
+    goal position, trap positions, time limit, cost target,
     the tile type of each grid position, and a list of all available actions.
 
     The grid is indexed top to bottom, left to right (i.e. the top left corner has coordinates (0, 0) and the bottom
@@ -100,6 +100,12 @@ class GameEnv:
                 )
             except ValueError:
                 assert False, "/!\\ ERROR: Invalid input file - PI time targets"
+            try:
+                self.ql_time_min_tgt, self.ql_time_max_tgt = tuple(
+                    [float(x) for x in get_line(f).split(",")]
+                )
+            except ValueError:
+                assert False, "/!\\ ERROR: Invalid input file - QL time targets"
             try:
                 self.vi_iter_min_tgt, self.vi_iter_max_tgt = tuple(
                     [int(x) for x in get_line(f).split(",")]
@@ -350,7 +356,7 @@ class GameEnv:
 
     def is_solved(self, state):
         """
-        Check if the game has been solved (i.e. player at exit and all levers activated)
+        Check if the game has been solved (i.e. player at exit)
         :param state: current GameState
         :return: True if solved, False otherwise
         """
@@ -358,7 +364,7 @@ class GameEnv:
 
     def is_game_over(self, state):
         """
-        Check if a game over situation has occurred (i.e. player has entered on a lava tile)
+        Check if a game over situation has occurred (i.e. player has walked on a cheese trap tile)
         :param state: current GameState
         :return: True if game over, False otherwise
         """

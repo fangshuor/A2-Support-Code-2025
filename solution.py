@@ -254,6 +254,19 @@ class Solver:
         #
         pass
 
+    def ql_get_state_action_value(self, state: GameState, action: str):
+        """
+        Retrieve the Q-value for a given state-action pair.
+        :param state: the current state
+        :param action: the current action
+        """
+        #
+        # TODO: Implement code to return the Q-value for a given state-action pair (based on the learned Q-values) here.
+        #
+        # In order to ensure compatibility with tester, you should avoid adding additional arguments to this function.
+        #
+        pass
+
     # === Helper Methods ===============================================================================================
     #
     #

@@ -2,16 +2,20 @@
 13, 22
 # gamma, epsilon
 0.999, 0.0001
+# q-learning epsilon start, end, decay, learning rate
+1.0, 0.1, 0.995, 0.05
 # VI time targets (min score target, max score target)
-0.10, 0.05
+0.006, 0.001
 # PI time targets (min score target, max score target)
-1.6, 0.8
+0.01, 0.002
+# QL time targets (min score target, max score target)
+0.075, 0.025
 # VI iterations targets (min score target, max score target)
-266, 133
+1512, 756
 # PI iterations targets (min score target, max score target)
-88, 44
+30, 15
 # reward target
--210.6, -105.3
+-807.2, -403.6
 # trapdoor probability
 0.4
 # jump probability
@@ -28,14 +32,14 @@
 1894
 XXXXXXXXXXXXXXXXXXXXXX
 X                    X
-X XXXTXXXXXXTXXXXTXX=X
+X XXTXTXTXTXTXTXTXTX=X
 X X                X=X
-X XTXXTXXXTXXXXXXX=X=X
-X         C       =X=X
-X XXTXTXXXXXXXXXXX=X=X
+X XTXTXTXTXTXTXTXT=X=X
+X      C C        =X=X
+X XXTTTXXXXXXXXXXX=X=X
 X XX     XXXXXXXXX=X=X
 X XX    =XXXXXXXXX=X=X
 X GX    =         =X=X
-XXXX    =XXTXXXXXXXX=X
+XXXX    =XXTXXXXTXXX=X
 XP      =           =X
 XXXXXXXXXXXXXXXXXXXXXX

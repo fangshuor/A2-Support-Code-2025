@@ -278,7 +278,7 @@ class GameEnv:
                 return False, None, None, None
         else:
             if standing_tile not in {self.AIR_TILE, self.LADDER_TILE, self.TRAPDOOR, self.CHEESE_TRAP}:
-                # Prerequisite not satisfied - can only drop through air or ladder tiles
+                # Prerequisite not satisfied - can only drop through air, trapdoor (if open), ladder, or cheese trap
                 return False, None, None, None
 
         random.seed(seed)

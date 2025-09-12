@@ -208,8 +208,8 @@ class Solver:
 
     def ql_iteration(self):
         """
-        Perform a single iteration of Policy Iteration (i.e. perform one step of policy evaluation and one step of
-        policy improvement).
+        Perform a single iteration of Q-Learning (i.e. begin from init_state and run one episode, i.e. till the agent
+        reaches a terminal state).
         """
         #
         # TODO: Implement code to perform a single iteration of Q-Learning here.

@@ -22,8 +22,7 @@ class Solver:
 
         #
         #
-        # TODO: Define any class instance variables you require here (avoid performing any computationally expensive
-        #  heuristic preprocessing operations here - use the preprocess_heuristic method below for this purpose).
+        # TODO: Define any class instance variables you require (e.g. dictionary mapping state to VI value) here.
         #
         #
 

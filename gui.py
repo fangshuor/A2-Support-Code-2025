@@ -55,7 +55,6 @@ class Viewer:
         # Load images
         if small_mode:
             self.background = tk.PhotoImage(file="gui_assets/Small/background_wall.png")
-            self.tile_player = tk.PhotoImage(file="gui_assets/Small/player_mouse.png")
             self.tile_cheese = tk.PhotoImage(file="gui_assets/Small/goal_cheese.png")
             self.tile_ladder = tk.PhotoImage(file="gui_assets/Small/ladder.png")
             self.tile_stone = tk.PhotoImage(file="gui_assets/Small/solid_wall.png")
@@ -66,16 +65,21 @@ class Viewer:
                 file="gui_assets/Small/trapdoor_open.png"
             )
             self.cheese_trap = tk.PhotoImage(file="gui_assets/Small/cheese_trap.png")
+            self.tile_player_left = tk.PhotoImage(file="gui_assets/Small/player_mouse.png")
+            self.tile_player_right = tk.PhotoImage(file="gui_assets/Small/player_mouse_right.png")
+            self.tile_player_back = tk.PhotoImage(file="gui_assets/Small/player_mouse_back.png")
 
         else:
             self.background = tk.PhotoImage(file="gui_assets/background_wall.png")
-            self.tile_player = tk.PhotoImage(file="gui_assets/player_mouse.png")
             self.tile_cheese = tk.PhotoImage(file="gui_assets/goal_cheese.png")
             self.tile_ladder = tk.PhotoImage(file="gui_assets/ladder.png")
             self.tile_stone = tk.PhotoImage(file="gui_assets/solid_wall.png")
             self.trapdoors_closed = tk.PhotoImage(file="gui_assets/trapdoor_closed.png")
             self.trapdoors_open = tk.PhotoImage(file="gui_assets/trapdoor_open.png")
             self.cheese_trap = tk.PhotoImage(file="gui_assets/cheese_trap.png")
+            self.tile_player_left = tk.PhotoImage(file="gui_assets/player_mouse.png")
+            self.tile_player_right = tk.PhotoImage(file="gui_assets/player_mouse_right.png")
+            self.tile_player_back = tk.PhotoImage(file="gui_assets/player_mouse_back.png")
 
         # Draw background (all permanent features, i.e. everything except player, traps)
         for r in range(self.game_env.n_rows):
@@ -136,6 +140,7 @@ class Viewer:
 
         # Draw player for initial state
         self.player_image = None
+        self.facing_left = True
         self.draw_player(init_state.row, init_state.col)
 
         self.window.update()
@@ -151,6 +156,14 @@ class Viewer:
         self.canvas.delete(self.player_image)
         self.draw_player(state.row, state.col)
 
+        if self.last_state.col < state.col:
+            self.facing_left = False
+        elif self.last_state.col > state.col:
+            self.facing_left = True
+        climbing = self.game_env.grid_data[state.row][state.col] == GameEnv.LADDER_TILE and state.row != self.last_state.row
+        # activating_lever = state.trap_status != self.last_state.trap_status  // Logic from A1 for lever activation
+        facing_back = climbing
+
         # Tween player to new position
         for i in range(1, self.TWEEN_STEPS + 1):
             time.sleep(self.TWEEN_DELAY)
@@ -162,7 +175,7 @@ class Viewer:
                 state.col - self.last_state.col
             )
             # Remove old player position, draw new player position
-            self.draw_player(r1, c1)
+            self.draw_player(r1, c1, self.facing_left, facing_back)
             self.window.update()
         self.last_state = state
 
@@ -195,10 +208,18 @@ class Viewer:
                     )
                 )
 
-    def draw_player(self, row, col):
+    def draw_player(self, row, col, facing_left=True, facing_back=False):
+        """
+        Draw the player at the specified row and column.
+        If facing_back, the player will be drawn facing away.
+        If facing_left, the player will be drawn facing left, otherwise facing right.
+        """
+        image_choice = self.tile_player_back if facing_back else (
+            self.tile_player_left if facing_left else self.tile_player_right
+        )
         self.player_image = self.canvas.create_image(
             (col * self.tile_w),
             (row * self.tile_h),
-            image=self.tile_player,
+            image=image_choice,
             anchor=tk.NW,
         )

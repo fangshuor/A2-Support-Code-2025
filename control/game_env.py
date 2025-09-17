@@ -324,7 +324,7 @@ class GameEnv:
 
             if standing_tile == self.TRAPDOOR and random.random() < self.trapdoor_prob:
                 movement = (1, 0)
-                direction = (-1, 0)
+                direction = (1, 0)
                 trapdoor_open = True
 
         elif action == self.CLIMB:

@@ -23,16 +23,20 @@ class Solver:
         self.ql_iterations = 0
         self.ql_epsilon = None
 
+        # caching for performance
         self.reachable_states = None
         self.valid_actions_cache = {}
         self.transition_cache = {}
 
+        # VI state values
         self.vi_values = {}
         self.vi_prev_values = {}
 
+        # PI policy and values
         self.pi_policy = {}
         self.pi_values = {}
 
+        # Q-learning Q-values
         self.q_values = {}
 
     @staticmethod
@@ -373,6 +377,7 @@ class Solver:
     # === Helper Methods ===============================================================================================
 
     def build_reachable_states(self):
+        # BFS to find all reachable states from initial position
         visited = set()
         queue = deque([self.game_env.get_init_state()])
         visited.add(self.game_env.get_init_state())
@@ -404,6 +409,7 @@ class Solver:
         return valid
 
     def get_transition_outcomes(self, state, action):
+        # return list of (probability, reward, next_state) tuples
         cache_key = (state, action)
         if cache_key in self.transition_cache:
             return self.transition_cache[cache_key]
